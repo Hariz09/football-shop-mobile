@@ -187,3 +187,311 @@ Widget build(BuildContext context) {
 - Tidak bisa mengubah initState() yang sudah dijalankan
 
 Dalam kasus tersebut, gunakan **Hot Restart**.
+
+---
+
+## Tugas 8: Flutter Navigation, Layouts, Forms, and Input Elements
+
+### 1. Jelaskan perbedaan antara `Navigator.push()` dan `Navigator.pushReplacement()` di Flutter. Dalam skenario apa masing-masing sebaiknya digunakan di aplikasi Football Shop?
+
+**Navigator.push():**
+- **Fungsi**: Menambahkan halaman baru ke atas stack navigasi tanpa menghapus halaman sebelumnya
+- **Behavior**: User dapat kembali ke halaman sebelumnya dengan tombol back
+- **Stack**: Halaman sebelumnya tetap ada di memory dalam navigation stack
+- **Use case**: Ketika user perlu kembali ke halaman sebelumnya
+
+**Navigator.pushReplacement():**
+- **Fungsi**: Mengganti halaman saat ini dengan halaman baru di stack navigasi
+- **Behavior**: User tidak dapat kembali ke halaman sebelumnya dengan tombol back
+- **Stack**: Halaman sebelumnya dihapus dari navigation stack
+- **Use case**: Ketika user tidak perlu kembali ke halaman sebelumnya (seperti setelah login)
+
+**Skenario penggunaan di Football Shop:**
+
+1. **Navigator.push()** - Digunakan saat:
+   - User menekan tombol "Create Product" dari home page → user mungkin ingin kembali ke home tanpa menyimpan
+   - User membuka detail produk → user ingin kembali ke daftar produk
+   - User membuka form edit → user bisa cancel dan kembali
+
+2. **Navigator.pushReplacement()** - Digunakan saat:
+   - User memilih menu di drawer (Halaman Utama/Tambah Produk) → mengganti halaman saat ini, tidak menumpuk halaman
+   - Setelah login berhasil → user tidak perlu kembali ke halaman login
+   - Setelah logout → user tidak bisa kembali ke halaman yang memerlukan autentikasi
+
+**Contoh implementasi di Football Shop:**
+```dart
+// Navigator.push - dari home ke form (bisa kembali)
+Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => const ProductEntryFormPage()),
+);
+
+// Navigator.pushReplacement - dari drawer menu (replace halaman)
+Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(builder: (context) => MyHomePage()),
+);
+```
+
+### 2. Bagaimana cara memanfaatkan hierarki widget (Scaffold, AppBar, Drawer) untuk membangun struktur halaman yang konsisten di seluruh aplikasi?
+
+**Hierarki Widget untuk Konsistensi:**
+
+1. **Scaffold** - Foundation Layer
+   - Menyediakan struktur dasar Material Design untuk setiap halaman
+   - Mengatur layout dengan AppBar, Drawer, Body, BottomNavigationBar, FloatingActionButton
+   - Memastikan semua halaman memiliki struktur yang sama
+   - Mengelola SnackBar, BottomSheet, dan Dialog
+
+2. **AppBar** - Header Layer
+   - Menampilkan judul aplikasi/halaman secara konsisten
+   - Menyediakan navigasi (back button, drawer icon)
+   - Menampilkan actions (search, settings, dll)
+   - Menggunakan tema yang sama di seluruh aplikasi
+
+3. **Drawer** - Navigation Layer
+   - Menyediakan menu navigasi yang konsisten di semua halaman
+   - Memudahkan akses ke halaman-halaman utama
+   - Menampilkan branding aplikasi (logo, nama)
+
+**Implementasi di Football Shop:**
+
+```dart
+// Setiap halaman menggunakan struktur yang sama
+Scaffold(
+  appBar: AppBar(
+    title: const Text('Football Shop'),
+    backgroundColor: Theme.of(context).colorScheme.primary,
+    iconTheme: const IconThemeData(color: Colors.white),
+  ),
+  drawer: const LeftDrawer(), // Drawer yang sama di semua halaman
+  body: // Konten spesifik halaman
+)
+```
+
+**Keuntungan:**
+- **Konsistensi Visual**: Semua halaman terlihat seragam
+- **User Experience**: User familiar dengan navigasi di setiap halaman
+- **Maintainability**: Perubahan pada drawer/appbar otomatis apply ke semua halaman
+- **Reusability**: Widget drawer dapat digunakan di banyak halaman
+
+**Best Practices:**
+- Buat widget drawer terpisah (`LeftDrawer`) yang dapat di-reuse
+- Gunakan tema global untuk warna AppBar
+- Pastikan semua halaman utama memiliki drawer yang sama
+- Gunakan consistent naming dan styling
+
+### 3. Dalam konteks desain UI, apa keuntungan menggunakan layout widget seperti Padding, SingleChildScrollView, dan ListView saat menampilkan elemen form? Berikan contoh dari aplikasi Football Shop.
+
+**1. Padding**
+
+**Keuntungan:**
+- Memberikan ruang/jarak di sekitar widget
+- Meningkatkan readability dan estetika
+- Mencegah konten menempel di tepi layar
+- Membuat UI lebih breathable dan comfortable
+
+**Contoh di Football Shop:**
+```dart
+// Di ProductEntryFormPage
+Padding(
+  padding: const EdgeInsets.all(16.0),
+  child: Column(
+    children: [
+      TextFormField(...), // Form fields dengan spacing yang baik
+    ],
+  ),
+)
+
+// Di InfoCard
+Container(
+  padding: const EdgeInsets.all(16.0),
+  child: Column(...), // Konten tidak menempel di tepi card
+)
+```
+
+**2. SingleChildScrollView**
+
+**Keuntungan:**
+- Memungkinkan konten yang panjang untuk di-scroll
+- Mencegah overflow error saat keyboard muncul
+- Mendukung berbagai ukuran layar (responsive)
+- Memastikan semua form fields dapat diakses
+
+**Contoh di Football Shop:**
+```dart
+// Di ProductEntryFormPage - form dengan banyak fields
+Form(
+  child: SingleChildScrollView(
+    child: Column(
+      children: [
+        TextFormField(...), // Name
+        TextFormField(...), // Price
+        TextFormField(...), // Description
+        TextFormField(...), // Thumbnail
+        TextFormField(...), // Category
+        Switch(...),        // isFeatured
+        ElevatedButton(...), // Save button
+      ],
+    ),
+  ),
+)
+```
+
+**Mengapa penting:**
+- Form memiliki 6 input fields + button
+- Saat keyboard muncul, form tetap bisa di-scroll
+- Mendukung layar kecil tanpa overflow
+- User dapat mengakses semua fields dengan mudah
+
+**3. ListView**
+
+**Keuntungan:**
+- Efficient rendering untuk list panjang (lazy loading)
+- Built-in scrolling behavior
+- Mendukung dynamic content
+- Memory efficient untuk banyak items
+
+**Contoh di Football Shop:**
+```dart
+// Di LeftDrawer - menu navigation
+Drawer(
+  child: ListView(
+    padding: EdgeInsets.zero,
+    children: [
+      DrawerHeader(...),
+      ListTile(...), // Halaman Utama
+      ListTile(...), // Tambah Produk
+      // Bisa ditambah menu lain tanpa overflow
+    ],
+  ),
+)
+```
+
+**Perbandingan Layout Widgets:**
+
+| Widget | Use Case | Keuntungan di Form |
+|--------|----------|-------------------|
+| **Padding** | Spacing & margins | Readability, estetika |
+| **SingleChildScrollView** | Long content | Prevent overflow, keyboard handling |
+| **ListView** | Dynamic lists | Efficient, scalable |
+| **Column** | Vertical layout | Simple, structured |
+| **Row** | Horizontal layout | Inline elements |
+
+**Best Practices di Form:**
+1. Gunakan `SingleChildScrollView` untuk form dengan banyak fields
+2. Tambahkan `Padding` untuk spacing yang konsisten
+3. Gunakan `SizedBox` untuk spacing antar fields
+4. Kombinasikan dengan `Column` untuk vertical layout
+5. Pastikan form responsive di berbagai ukuran layar
+
+### 4. Bagaimana cara kustomisasi tema warna untuk memastikan aplikasi Football Shop memiliki identitas visual yang konsisten sesuai brand toko?
+
+**1. Kustomisasi Tema Global di main.dart**
+
+```dart
+MaterialApp(
+  title: 'Football Shop',
+  theme: ThemeData(
+    colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue)
+      .copyWith(secondary: Colors.blueAccent[400]),
+  ),
+  home: MyHomePage(),
+)
+```
+
+**Penjelasan:**
+- **Primary Color (Blue)**: Merepresentasikan profesionalisme dan kepercayaan
+- **Secondary Color (Blue Accent)**: Untuk aksen dan highlight
+- Warna biru cocok untuk toko sepak bola (warna umum di dunia olahraga)
+
+**2. Konsistensi Penggunaan Tema**
+
+**AppBar:**
+```dart
+AppBar(
+  backgroundColor: Theme.of(context).colorScheme.primary,
+  iconTheme: const IconThemeData(color: Colors.white),
+)
+```
+
+**Buttons:**
+```dart
+ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Theme.of(context).colorScheme.primary,
+    foregroundColor: Colors.white,
+  ),
+)
+```
+
+**Switch:**
+```dart
+Switch(
+  activeColor: Theme.of(context).colorScheme.primary,
+)
+```
+
+**3. Color Palette untuk Football Shop**
+
+**Implementasi saat ini:**
+- **Primary**: Blue - Profesional, trustworthy
+- **Secondary**: Blue Accent - Energetic, sporty
+- **Item Cards**:
+  - Blue (All Products) - Informasi
+  - Green (My Products) - Success/Personal
+  - Red (Create Product) - Action/Important
+
+**4. Keuntungan Kustomisasi Tema:**
+
+1. **Konsistensi Visual**
+   - Semua komponen menggunakan warna yang sama
+   - Brand identity yang kuat
+   - Professional appearance
+
+2. **Maintainability**
+   - Ubah warna di satu tempat (theme)
+   - Otomatis apply ke seluruh aplikasi
+   - Mudah untuk rebrand
+
+3. **User Experience**
+   - Familiar color scheme
+   - Visual hierarchy yang jelas
+   - Mudah dikenali
+
+4. **Accessibility**
+   - Kontras warna yang baik (blue & white)
+   - Readable text
+   - Clear visual cues
+
+**5. Best Practices:**
+
+```dart
+// Gunakan theme colors, bukan hardcoded colors
+// ❌ Bad
+backgroundColor: Colors.blue
+
+// ✅ Good
+backgroundColor: Theme.of(context).colorScheme.primary
+
+// Untuk custom colors, definisikan di theme
+theme: ThemeData(
+  colorScheme: ColorScheme.fromSwatch(
+    primarySwatch: Colors.blue,
+  ).copyWith(
+    secondary: Colors.blueAccent[400],
+    error: Colors.red,
+    surface: Colors.white,
+  ),
+)
+```
+
+**6. Rekomendasi untuk Football Shop:**
+
+Untuk identitas brand yang lebih kuat, bisa menggunakan:
+- **Primary**: Dark Blue/Navy - Profesional, sporty
+- **Secondary**: Orange/Yellow - Energetic, action
+- **Accent**: Green - Success, achievement
+- **Background**: White/Light Gray - Clean, modern
+
+Ini akan memberikan tampilan yang lebih sporty dan energetic sesuai dengan tema sepak bola.
