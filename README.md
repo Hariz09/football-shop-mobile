@@ -485,13 +485,3 @@ theme: ThemeData(
   ),
 )
 ```
-
-**6. Rekomendasi untuk Football Shop:**
-
-Untuk identitas brand yang lebih kuat, bisa menggunakan:
-- **Primary**: Dark Blue/Navy - Profesional, sporty
-- **Secondary**: Orange/Yellow - Energetic, action
-- **Accent**: Green - Success, achievement
-- **Background**: White/Light Gray - Clean, modern
-
-Ini akan memberikan tampilan yang lebih sporty dan energetic sesuai dengan tema sepak bola.
